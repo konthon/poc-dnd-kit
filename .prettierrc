@@ -1,0 +1,25 @@
+{
+  "printWidth": 100,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": false,
+  "bracketSpacing": true,
+  "importOrder": [
+    "(^react$|^next/)",
+    "<THIRD_PARTY_MODULES>",
+    "(?:/|\\./|\\.\\./)*interfaces",
+    "(?:/|\\./|\\.\\./)*models",
+    "^(?!styled-components).*(?:/|\\.)components(?:/|\\.|$)",
+    "(?:/|\\./|\\.\\./)*hooks",
+    "(?:/|\\./|\\.\\./)*utils",
+    "(?:/|\\./|\\.\\./)*pages",
+    "(((?:/|\\./|\\.\\./)*constants)|((?:/|\\./|\\.\\./)*types)|.(json)$)",
+    "(?:/|\\./|\\.\\./)*Context",
+    "(?:/|\\./|\\.\\./)*middlewares",
+    "((^(?!.*styled-components).*(?:/|\\.)styles(?:/|\\.|$))|.(css|scss)$)",
+    "^[.]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
