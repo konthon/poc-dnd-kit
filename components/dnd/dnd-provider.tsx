@@ -1,5 +1,7 @@
 "use client";
 
+import { defaultPreset } from "@dnd-kit/dom";
+import { Debug } from "@dnd-kit/dom/plugins/debug";
 import { DragDropProvider } from "@dnd-kit/react";
 import { FC, PropsWithChildren } from "react";
 
@@ -17,6 +19,7 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <DragDropProvider
+      plugins={[Debug, ...defaultPreset.plugins]}
       onDragOver={(e) => {
         if (e.operation.source) {
           const { source, target } = e.operation;
