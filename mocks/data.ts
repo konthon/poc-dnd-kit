@@ -109,7 +109,7 @@ export const mockComponentDefinitions: ComponentDefinition[] = [
   {
     componentType: "ContainerComponent",
     displayName: "Container",
-    icon: "Layout",
+    icon: "layout",
     acceptChild: true,
     propsSchema: [
       {
@@ -130,7 +130,7 @@ export const mockComponentDefinitions: ComponentDefinition[] = [
   {
     componentType: "HeadingComponent",
     displayName: "Heading",
-    icon: "Type",
+    icon: "type",
     acceptChild: false,
     propsSchema: [
       {
@@ -159,7 +159,7 @@ export const mockComponentDefinitions: ComponentDefinition[] = [
   {
     componentType: "TextComponent",
     displayName: "Text",
-    icon: "Text",
+    icon: "text",
     acceptChild: false,
     propsSchema: [
       {
@@ -188,7 +188,7 @@ export const mockComponentDefinitions: ComponentDefinition[] = [
   {
     componentType: "ImageComponent",
     displayName: "Image",
-    icon: "Image",
+    icon: "image",
     acceptChild: false,
     propsSchema: [
       {
@@ -217,7 +217,7 @@ export const mockComponentDefinitions: ComponentDefinition[] = [
   {
     componentType: "ButtonComponent",
     displayName: "Button",
-    icon: "Square",
+    icon: "square",
     acceptChild: false,
     propsSchema: [
       {
@@ -251,7 +251,7 @@ export const mockComponentDefinitions: ComponentDefinition[] = [
   {
     componentType: "CardComponent",
     displayName: "Card",
-    icon: "CreditCard",
+    icon: "credit-card",
     acceptChild: true,
     propsSchema: [
       {
