@@ -54,6 +54,17 @@ interface ContentStore {
   prependChildNode: (source: TemplateNode, target: TemplateNode) => void;
 }
 
+// export function isChild(childId: TemplateNode["nodeId"], parent: TemplateNode) {
+//   if (parent.children.some((child) => child.nodeId === childId)) {
+//     return true;
+//   }
+//   for (const node of parent.children) {
+//     const result = isChild(childId, node);
+//     if (result) return true;
+//   }
+//   return false;
+// }
+
 function prependNode(
   source: TemplateNode,
   target?: TemplateNode,
@@ -114,7 +125,7 @@ function moveNode(
   content: TemplateNode[] = [],
 ) {
   const removed = removeNode(source.nodeId, content);
-  if (!target || type === "prepend") {
+  if (type === "prepend") {
     return prependNode(source, target, removed);
   }
   return appendNode(source, target, removed);
@@ -136,13 +147,17 @@ function prependChildNode(
   target: TemplateNode,
   content: TemplateNode[],
 ): TemplateNode[] {
-  const clone = structuredClone(content);
+  const clone = JSON.parse(JSON.stringify(content));
 
   const sourceGroup = findGroup(clone, source.nodeId);
   if (!sourceGroup) {
     throw new Error(`Source group ${source.nodeId} not found`);
   }
   const sourceIndex = sourceGroup.findIndex((node) => node.nodeId === source.nodeId);
+  // console.log({ sourceId: source.nodeId, content, clone, sourceGroup, sourceIndex });
+  if (sourceIndex < 0) {
+    throw new Error(`Source item ${source.nodeId} not found in group ___`);
+  }
   const [sourceNode] = sourceGroup.splice(sourceIndex, 1);
 
   const targetGroup = findGroup(clone, target.nodeId);
@@ -150,6 +165,9 @@ function prependChildNode(
     throw new Error(`Target group ${target.nodeId} not found`);
   }
   const targetIndex = targetGroup.findIndex((node) => node.nodeId === target.nodeId);
+  if (targetIndex < 0) {
+    throw new Error(`Target item ${target.nodeId} not found in group ___`);
+  }
   targetGroup[targetIndex].children.splice(0, 0, sourceNode);
   return clone;
 }
@@ -179,7 +197,6 @@ export const useContentStore = create<ContentStore>((set, get) => ({
   },
 
   prependChildNode: (source, target) => {
-    // console.log(prependChildNode(source, target, get().content));
     set((state) => ({ content: prependChildNode(source, target, state.content) }));
   },
 }));

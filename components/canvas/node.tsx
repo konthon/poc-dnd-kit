@@ -106,13 +106,18 @@ export const SortableGroup: FC<PropsWithChildren<SortableGroupProps>> = ({
         </button>
       </div>
       <div>{group}</div>
-      <div
-        ref={targetRef}
-        data-dragtarget={isDropTarget}
-        className="min-h-[100px] border-2 border-dashed border-gray-300 p-2 text-gray-500 data-[dragtarget=true]:bg-gray-300"
-      >
-        DROP HERE
-      </div>
+      {node.children.length < 2 && (
+        <div
+          ref={targetRef}
+          data-dragtarget={isDropTarget}
+          className={cn(
+            "flex min-h-[100px] items-center justify-center rounded border-2 border-dashed border-gray-300 p-2 text-center text-gray-500",
+            "data-[dragtarget=true]:bg-gray-300",
+          )}
+        >
+          Drop children here
+        </div>
+      )}
       <div>{children}</div>
     </div>
   );

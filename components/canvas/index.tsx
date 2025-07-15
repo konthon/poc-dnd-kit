@@ -7,6 +7,7 @@ import React, { FC, useEffect } from "react";
 import { ItemType, useContentStore } from "@/stores/dnd";
 import { ComponentDefinition } from "@/types/component-definition";
 import { Template, TemplateNode } from "@/types/template";
+
 import { SortableGroup, SortableNode } from "./node";
 
 interface Props {
@@ -55,14 +56,6 @@ export const Canvas: FC<Props> = ({ template, componentDefs }) => {
           Drop a new component here
         </div>
         <DeepRender content={content} group="root" componentDefs={componentDefs} />
-        <button
-          type="button"
-          onClick={() => {
-            console.log(content);
-          }}
-        >
-          Click to PRINT in console
-        </button>
       </div>
     </div>
   );

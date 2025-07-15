@@ -23,29 +23,47 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
       onDragOver={(e) => {
         if (e.operation.source) {
           const { source, target } = e.operation;
-          console.log(target?.type, source.type);
+          // console.log(
+          //   JSON.stringify(
+          //     {
+          //       source: { type: source.type, id: source.id },
+          //       target: { type: target?.type, id: target?.id },
+          //     },
+          //     null,
+          //     2,
+          //   ),
+          // );
 
           if (source.type === ItemType.COMPONENT) return;
 
-          if (!target) return;
+          if (!target) {
+            console.log("NO TARGET", source.type);
+            if ([ItemType.NODE, ItemType.GROUP].includes(source.type as ItemType)) {
+              console.log("NO TARGET - checked;", source.type);
+              moveNode("append", source.data as TemplateNode);
+              return;
+            }
+            return;
+          }
 
           const sourceGroupId = source.data.groupId;
           const targetGroupId = target.data.groupId;
 
-          // same position
           if (sourceGroupId === targetGroupId && source.id === target.id) return;
-
-          // same item
           if (source.id === targetGroupId) return;
+
+          console.log("next move");
 
           if (target.type === ItemType.ROOT_TOP) {
             if ([ItemType.NODE, ItemType.GROUP].includes(source.type as ItemType)) {
-              console.log("===== in", target.data);
+              console.log("TO TOP");
               moveNode("prepend", source.data as TemplateNode);
             }
+            return;
           }
 
           if (target.type === ItemType.GROUP) {
+            console.log("TO GROUP");
             prependChildNode(source.data as TemplateNode, target.data as TemplateNode);
             return;
           }
@@ -54,9 +72,8 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
           let isBelowTarget = false;
           if (target.shape) {
             isBelowTarget = position.y < target.shape.center.y;
-            // console.log(position.x, target.shape.center.x);
           }
-          // console.log(isBelowTarget ? "append" : "prepend");
+          console.log("FALLBACK");
           moveNode(
             isBelowTarget ? "append" : "prepend",
             source.data as TemplateNode,
