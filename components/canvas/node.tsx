@@ -41,7 +41,7 @@ export const SortableNode: FC<SortableNodeProps> = ({ node, index, group, isDisa
     data: { ...node, groupId: group },
     type: ItemType.NODE,
     accept: [ItemType.NODE, ItemType.GROUP],
-    collisionPriority: CollisionPriority.Lowest,
+    collisionPriority: CollisionPriority.Low,
     feedback: "clone",
     disabled: isDisabled,
   });
@@ -62,7 +62,8 @@ export const SortableNode: FC<SortableNodeProps> = ({ node, index, group, isDisa
           <Trash2 />
         </button>
       </div>
-      <div>{group}</div>
+      <div className="font-mono text-xs text-current/50">{`group: ${group}`}</div>
+      <div className="font-mono text-sm">{node.nodeId}</div>
     </div>
   );
 };
@@ -111,7 +112,8 @@ export const SortableGroup: FC<SortableGroupProps> = ({
           <Trash2 />
         </button>
       </div>
-      <div>{group}</div>
+      <div className="font-mono text-xs text-current/50">{`group: ${group}`}</div>
+      <div className="font-mono text-sm">{node.nodeId}</div>
 
       <div
         ref={targetRef}
