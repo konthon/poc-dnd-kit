@@ -79,7 +79,7 @@ function prependNode(
   }
   return content.map((node) => {
     if (node.children.length > 0) {
-      return { ...node, children: appendNode(source, target, node.children) };
+      return { ...node, children: prependNode(source, target, node.children) };
     }
     return node;
   });
@@ -172,7 +172,7 @@ function prependChildNode(
   return clone;
 }
 
-export const useContentStore = create<ContentStore>((set, get) => ({
+export const useContentStore = create<ContentStore>((set) => ({
   content: [],
   setContent: (content) => {
     if (typeof content === "function") {
@@ -188,9 +188,7 @@ export const useContentStore = create<ContentStore>((set, get) => ({
     set((state) => ({ content: appendNode(source, target, state.content) }));
   },
   moveNode: (type, source, target) => {
-    if (source.nodeId !== target?.nodeId) {
-      set((state) => ({ content: moveNode(type, source, target, state.content) }));
-    }
+    set((state) => ({ content: moveNode(type, source, target, state.content) }));
   },
   removeNode: (nodeId) => {
     set((state) => ({ content: removeNode(nodeId, state.content) }));
