@@ -3,7 +3,7 @@
 import { CollisionPriority } from "@dnd-kit/abstract";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { GripVertical, Trash2 } from "lucide-react";
-import { FC, PropsWithChildren } from "react";
+import { FC, ReactNode } from "react";
 
 import { ItemType, useContentStore } from "@/stores/dnd";
 import { TemplateNode } from "@/types/template";
@@ -31,8 +31,9 @@ interface SortableNodeProps {
   node: TemplateNode;
   index: number;
   group: string;
+  isDisabled?: boolean;
 }
-export const SortableNode: FC<SortableNodeProps> = ({ node, index, group }) => {
+export const SortableNode: FC<SortableNodeProps> = ({ node, index, group, isDisabled }) => {
   const { ref } = useSortable({
     id: node.nodeId,
     index,
@@ -42,6 +43,7 @@ export const SortableNode: FC<SortableNodeProps> = ({ node, index, group }) => {
     accept: [ItemType.NODE, ItemType.GROUP],
     collisionPriority: CollisionPriority.Lowest,
     feedback: "clone",
+    disabled: isDisabled,
   });
 
   const remove = useContentStore((state) => state.removeNode);
@@ -69,14 +71,17 @@ interface SortableGroupProps {
   node: TemplateNode;
   index: number;
   group: string;
+  children?: (isParentDragging?: boolean) => ReactNode;
+  isDisabled?: boolean;
 }
-export const SortableGroup: FC<PropsWithChildren<SortableGroupProps>> = ({
+export const SortableGroup: FC<SortableGroupProps> = ({
   node,
   index,
   group,
   children,
+  isDisabled,
 }) => {
-  const { ref, handleRef, targetRef, isDropTarget } = useSortable({
+  const { ref, handleRef, targetRef, isDropTarget, isDragging } = useSortable({
     id: node.nodeId,
     index,
     group,
@@ -85,6 +90,7 @@ export const SortableGroup: FC<PropsWithChildren<SortableGroupProps>> = ({
     accept: [ItemType.GROUP, ItemType.NODE],
     collisionPriority: CollisionPriority.Low,
     feedback: "clone",
+    disabled: isDisabled,
   });
   const remove = useContentStore((state) => state.removeNode);
 
@@ -106,19 +112,19 @@ export const SortableGroup: FC<PropsWithChildren<SortableGroupProps>> = ({
         </button>
       </div>
       <div>{group}</div>
-      {node.children.length < 2 && (
-        <div
-          ref={targetRef}
-          data-dragtarget={isDropTarget}
-          className={cn(
-            "flex min-h-[100px] items-center justify-center rounded border-2 border-dashed border-gray-300 p-2 text-center text-gray-500",
-            "data-[dragtarget=true]:bg-gray-300",
-          )}
-        >
-          Drop children here
-        </div>
-      )}
-      <div>{children}</div>
+
+      <div
+        ref={targetRef}
+        data-dragtarget={isDropTarget}
+        className={cn(
+          "flex min-h-[100px] items-center justify-center rounded border-2 border-dashed border-gray-300 p-2 text-center text-gray-500",
+          "data-[dragtarget=true]:bg-gray-300",
+        )}
+      >
+        Drop children here
+      </div>
+
+      <div data-dnd-children>{children?.(isDragging)}</div>
     </div>
   );
 };

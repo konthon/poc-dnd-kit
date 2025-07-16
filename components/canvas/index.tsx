@@ -65,8 +65,9 @@ interface DeepRenderProps {
   content: TemplateNode[];
   group: string;
   componentDefs: ComponentDefinition[];
+  isDisabled?: boolean;
 }
-const DeepRender: FC<DeepRenderProps> = ({ content, group, componentDefs }) => {
+const DeepRender: FC<DeepRenderProps> = ({ content, group, isDisabled, componentDefs }) => {
   return (
     <>
       {content.map((node, index) => {
@@ -77,17 +78,28 @@ const DeepRender: FC<DeepRenderProps> = ({ content, group, componentDefs }) => {
           // wrapped with div to eliminate removeChild bug
           return (
             <div data-dnd-group key={node.nodeId}>
-              <SortableGroup node={node} index={index} group={group}>
-                <DeepRender
-                  content={node.children}
-                  group={node.nodeId}
-                  componentDefs={componentDefs}
-                />
+              <SortableGroup node={node} index={index} group={group} isDisabled={isDisabled}>
+                {(isParentDragging) => (
+                  <DeepRender
+                    content={node.children}
+                    group={node.nodeId}
+                    componentDefs={componentDefs}
+                    isDisabled={isParentDragging}
+                  />
+                )}
               </SortableGroup>
             </div>
           );
         }
-        return <SortableNode key={node.nodeId} node={node} index={index} group={group} />;
+        return (
+          <SortableNode
+            key={node.nodeId}
+            node={node}
+            index={index}
+            group={group}
+            isDisabled={isDisabled}
+          />
+        );
       })}
     </>
   );
