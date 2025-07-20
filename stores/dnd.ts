@@ -3,24 +3,6 @@ import { create } from "zustand";
 import type { ComponentDefinition } from "@/types/component-definition";
 import type { TemplateNode } from "@/types/template";
 
-// interface ComponentStore {
-//   componentDefs: ComponentDefinition[];
-//   setComponentDefs: (newDefs: ComponentDefinition[]) => void;
-//   getComponentDef: (type: ComponentDefinition["componentType"]) => ComponentDefinition | undefined;
-// }
-
-// export const useComponentStore = create<ComponentStore>((set, get) => ({
-//   componentDefs: [],
-//   setComponentDefs: (newDefs) => {
-//     set({ componentDefs: newDefs });
-//   },
-//   getComponentDef: (type) => {
-//     const componentDefs = get().componentDefs;
-//     const found = componentDefs.find((comp) => comp.componentType === type);
-//     return found;
-//   },
-// }));
-
 export enum ItemType {
   ROOT_TOP = "root-top",
   ROOT_BOTTOM = "root-bottom",
@@ -51,19 +33,8 @@ interface ContentStore {
   appendNode: (source: TemplateNode, target?: TemplateNode) => void;
   moveNode: (type: MoveType, source: TemplateNode, target?: TemplateNode) => void;
   removeNode: (nodeId: TemplateNode["nodeId"]) => void;
-  prependChildNode: (source: TemplateNode, target: TemplateNode) => void;
+  prependChildNode: (source: TemplateNode, target: TemplateNode, isNewNode?: boolean) => void;
 }
-
-// export function isChild(childId: TemplateNode["nodeId"], parent: TemplateNode) {
-//   if (parent.children.some((child) => child.nodeId === childId)) {
-//     return true;
-//   }
-//   for (const node of parent.children) {
-//     const result = isChild(childId, node);
-//     if (result) return true;
-//   }
-//   return false;
-// }
 
 function prependNode(
   source: TemplateNode,
@@ -146,19 +117,23 @@ function prependChildNode(
   source: TemplateNode,
   target: TemplateNode,
   content: TemplateNode[],
+  isNewNode = false,
 ): TemplateNode[] {
-  const clone = JSON.parse(JSON.stringify(content));
+  const clone = structuredClone(content);
 
-  const sourceGroup = findGroup(clone, source.nodeId);
-  if (!sourceGroup) {
-    throw new Error(`Source group ${source.nodeId} not found`);
+  let newNode = source;
+  if (!isNewNode) {
+    const sourceGroup = findGroup(clone, source.nodeId);
+    if (!sourceGroup) {
+      throw new Error(`Source group ${source.nodeId} not found`);
+    }
+    const sourceIndex = sourceGroup.findIndex((node) => node.nodeId === source.nodeId);
+    if (sourceIndex < 0) {
+      throw new Error(`Source item ${source.nodeId} not found in group ___`);
+    }
+    const splicedNodes = sourceGroup.splice(sourceIndex, 1);
+    newNode = splicedNodes[0];
   }
-  const sourceIndex = sourceGroup.findIndex((node) => node.nodeId === source.nodeId);
-  // console.log({ sourceId: source.nodeId, content, clone, sourceGroup, sourceIndex });
-  if (sourceIndex < 0) {
-    throw new Error(`Source item ${source.nodeId} not found in group ___`);
-  }
-  const [sourceNode] = sourceGroup.splice(sourceIndex, 1);
 
   const targetGroup = findGroup(clone, target.nodeId);
   if (!targetGroup) {
@@ -168,7 +143,7 @@ function prependChildNode(
   if (targetIndex < 0) {
     throw new Error(`Target item ${target.nodeId} not found in group ___`);
   }
-  targetGroup[targetIndex].children.splice(0, 0, sourceNode);
+  targetGroup[targetIndex].children.splice(0, 0, newNode);
   return clone;
 }
 
@@ -194,7 +169,7 @@ export const useContentStore = create<ContentStore>((set) => ({
     set((state) => ({ content: removeNode(nodeId, state.content) }));
   },
 
-  prependChildNode: (source, target) => {
-    set((state) => ({ content: prependChildNode(source, target, state.content) }));
+  prependChildNode: (source, target, isNewNode) => {
+    set((state) => ({ content: prependChildNode(source, target, state.content, isNewNode) }));
   },
 }));

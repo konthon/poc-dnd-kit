@@ -34,7 +34,7 @@ interface SortableNodeProps {
   isDisabled?: boolean;
 }
 export const SortableNode: FC<SortableNodeProps> = ({ node, index, group, isDisabled }) => {
-  const { ref } = useSortable({
+  const { ref, handleRef } = useSortable({
     id: node.nodeId,
     index,
     group,
@@ -50,7 +50,10 @@ export const SortableNode: FC<SortableNodeProps> = ({ node, index, group, isDisa
 
   return (
     <div ref={ref} className={nodeStyle}>
-      <div className="flex">
+      <div className="flex items-center gap-2">
+        <button ref={handleRef} type="button" className={grabButtonStyle}>
+          <GripVertical />
+        </button>
         <div className="grow font-medium">{node.componentType}</div>
         <button
           type="button"
@@ -88,7 +91,7 @@ export const SortableGroup: FC<SortableGroupProps> = ({
     group,
     data: { ...node, groupId: group },
     type: ItemType.GROUP,
-    accept: [ItemType.GROUP, ItemType.NODE],
+    accept: [ItemType.GROUP, ItemType.NODE, ItemType.COMPONENT],
     collisionPriority: CollisionPriority.Low,
     feedback: "clone",
     disabled: isDisabled,
