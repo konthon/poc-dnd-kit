@@ -20,8 +20,15 @@ export const Canvas: FC<Props> = ({ template, componentDefs }) => {
   const setContent = useContentStore((state) => state.setContent);
 
   const { ref: topRef, isDropTarget: isTopTarget } = useDroppable({
-    id: template!.id,
+    id: `${template!.id}-top`,
     type: ItemType.ROOT_TOP,
+    data: content,
+    accept: [ItemType.COMPONENT],
+    collisionPriority: CollisionPriority.Low,
+  });
+  const { ref: bottomRef, isDropTarget: isBottomTarget } = useDroppable({
+    id: `${template!.id}-bottom`,
+    type: ItemType.ROOT_BOTTOM,
     data: content,
     accept: [ItemType.COMPONENT],
     collisionPriority: CollisionPriority.Low,
@@ -60,6 +67,13 @@ export const Canvas: FC<Props> = ({ template, componentDefs }) => {
           Drop a new component here
         </div>
         <DeepRender content={content} group="root" componentDefs={componentDefs} />
+        <div
+          ref={bottomRef}
+          data-drop-target={isBottomTarget}
+          className="bg-amber-100 px-2 py-4 data-[drop-target=true]:bg-amber-500"
+        >
+          Drop a new component here
+        </div>
       </div>
     </div>
   );
