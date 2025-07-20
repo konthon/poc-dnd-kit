@@ -19,7 +19,7 @@ export const Canvas: FC<Props> = ({ template, componentDefs }) => {
   const content = useContentStore((state) => state.content);
   const setContent = useContentStore((state) => state.setContent);
 
-  const { ref, isDropTarget } = useDroppable({
+  const { ref: topRef, isDropTarget: isTopTarget } = useDroppable({
     id: template!.id,
     type: ItemType.ROOT_TOP,
     data: content,
@@ -33,13 +33,17 @@ export const Canvas: FC<Props> = ({ template, componentDefs }) => {
         nodeId: "container-1",
         componentType: "ContainerComponent",
         props: {},
-        children: [{ nodeId: "text-1", componentType: "TextComponent", props: {}, children: [] }],
-      },
-      {
-        nodeId: "container-2",
-        componentType: "ContainerComponent",
-        props: {},
-        children: [{ nodeId: "text-2", componentType: "TextComponent", props: {}, children: [] }],
+        children: [
+          {
+            nodeId: "container-2",
+            componentType: "ContainerComponent",
+            props: {},
+            children: [
+              { nodeId: "text-2", componentType: "TextComponent", props: {}, children: [] },
+            ],
+          },
+          { nodeId: "text-1", componentType: "TextComponent", props: {}, children: [] },
+        ],
       },
     ]);
   }, []);
@@ -49,8 +53,8 @@ export const Canvas: FC<Props> = ({ template, componentDefs }) => {
       <h3 className="mb-4 font-medium">Template</h3>
       <div className="border border-red-300 p-2">
         <div
-          ref={ref}
-          data-drop-target={isDropTarget}
+          ref={topRef}
+          data-drop-target={isTopTarget}
           className="bg-amber-100 px-2 py-4 data-[drop-target=true]:bg-amber-500"
         >
           Drop a new component here
@@ -84,7 +88,7 @@ const DeepRender: FC<DeepRenderProps> = ({ content, group, isDisabled, component
                     content={node.children}
                     group={node.nodeId}
                     componentDefs={componentDefs}
-                    isDisabled={isParentDragging}
+                    isDisabled={isParentDragging || isDisabled}
                   />
                 )}
               </SortableGroup>

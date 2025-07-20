@@ -12,10 +12,8 @@ import { TemplateNode } from "@/types/template";
 export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
   const prependNode = useContentStore((state) => state.prependNode);
   const appendNode = useContentStore((state) => state.appendNode);
-  const setContent = useContentStore((state) => state.setContent);
   const moveNode = useContentStore((state) => state.moveNode);
   const prependChildNode = useContentStore((state) => state.prependChildNode);
-  const removeNode = useContentStore((state) => state.removeNode);
 
   return (
     <DragDropProvider
@@ -23,24 +21,15 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
       onDragOver={(e) => {
         if (e.operation.source) {
           const { source, target } = e.operation;
-          // console.log(
-          //   JSON.stringify(
-          //     {
-          //       source: { type: source.type, id: source.id },
-          //       target: { type: target?.type, id: target?.id },
-          //     },
-          //     null,
-          //     2,
-          //   ),
-          // );
 
           if (source.type === ItemType.COMPONENT) return;
 
           if (!target) {
             console.log("NO TARGET", source.type);
             if ([ItemType.NODE, ItemType.GROUP].includes(source.type as ItemType)) {
-              console.log("NO TARGET - checked;", source.type);
-              moveNode("append", source.data as TemplateNode);
+              const isMoveUp = e.operation.position.initial.y > e.operation.position.current.y;
+              console.log("NO TARGET - checked;", source.type, { isMoveUp });
+              moveNode(isMoveUp ? "prepend" : "append", source.data as TemplateNode);
               return;
             }
             return;
@@ -49,21 +38,28 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
           const sourceGroupId = source.data.groupId;
           const targetGroupId = target.data.groupId;
 
-          if (sourceGroupId === targetGroupId && source.id === target.id) return;
-          if (source.id === targetGroupId) return;
-
-          console.log("next move");
+          if (sourceGroupId === targetGroupId && source.id === target.id) {
+            console.log(
+              `From group ${sourceGroupId} to group ${targetGroupId} | same ID: ${source.id}`,
+            );
+            return;
+          }
+          if (source.id === targetGroupId) {
+            console.log(`Source: ${source.id} as same as group ${targetGroupId}`);
+            return;
+          }
 
           if (target.type === ItemType.ROOT_TOP) {
+            console.log("PREPEND | ROOT_TOP");
             if ([ItemType.NODE, ItemType.GROUP].includes(source.type as ItemType)) {
-              console.log("TO TOP");
+              console.log("PREPEND | ROOT_TOP", source.id);
               moveNode("prepend", source.data as TemplateNode);
             }
             return;
           }
 
           if (target.type === ItemType.GROUP) {
-            console.log("TO GROUP");
+            console.log(`PREPEND-child | ${source.id} to GROUP:${target.id}`);
             prependChildNode(source.data as TemplateNode, target.data as TemplateNode);
             return;
           }
@@ -71,9 +67,20 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
           const position = e.operation.position.current;
           let isBelowTarget = false;
           if (target.shape) {
-            isBelowTarget = position.y < target.shape.center.y;
+            console.log("HAS SHAPE", position.y, target.shape.center.y);
+            if (source.type === ItemType.GROUP) {
+              isBelowTarget = position.y < target.shape.center.y;
+            } else {
+              isBelowTarget = position.y > target.shape.center.y;
+            }
+          } else if (!target.shape) {
+            console.log("NO SHAPE");
+            isBelowTarget = position.y > e.operation.position.initial.y;
           }
-          console.log("FALLBACK");
+
+          console.log(
+            `MOVE | ${source.id} ${isBelowTarget ? "APPEND" : "PREPEND"} to ${target.id}`,
+          );
           moveNode(
             isBelowTarget ? "append" : "prepend",
             source.data as TemplateNode,
@@ -82,29 +89,23 @@ export const DnDProvider: FC<PropsWithChildren> = ({ children }) => {
         }
       }}
       onDragEnd={(e) => {
-        // console.log(e.operation.position, e.operation.target?.shape);
         if (e.operation.target && e.operation.source) {
           const { source, target } = e.operation;
-          // Component to TOP of root
-          if (source.type === ItemType.COMPONENT && target.type === ItemType.ROOT_TOP) {
+          if (source.type === ItemType.COMPONENT) {
             const newNode = transformComponentToNode(source.data as ComponentDefinition);
-            prependNode(newNode);
+            switch (target.type) {
+              case ItemType.ROOT_TOP:
+                prependNode(newNode);
+                break;
+              case ItemType.GROUP:
+                prependChildNode(newNode, target.data as TemplateNode, true);
+                break;
+              case ItemType.ROOT_BOTTOM:
+              default:
+                appendNode(newNode);
+                break;
+            }
           }
-          // // Component to BOTTOM of each node
-          // if (source.type === "component" && target.type === "node") {
-          //   const newNode = transformComponentToNode(source.data as ComponentDefinition);
-          //   appendNode(newNode, target.data as TemplateNode);
-          // }
-          // // Node to TOP of root
-          // if (source.type === "node" && target.type === "root") {
-          //   moveNode(source.data as TemplateNode);
-          // }
-          // // Node to each node
-          // if (source.type === "node" && target.type === "node") {
-          //   moveNode(source.data as TemplateNode, target.data as TemplateNode);
-          // }
-
-          // console.log(source.data, target.data, { source, target });
         }
       }}
     >
